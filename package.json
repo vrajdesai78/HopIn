@@ -27,6 +27,7 @@
     "react-draggable": "^4.4.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
+    "sawo-react": "^1.0.6",
     "twilio": "^3.48.1",
     "twilio-video": "^2.7.1"
   },
