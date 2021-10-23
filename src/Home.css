@@ -1,0 +1,17 @@
+.home-ctn {
+  background-color: #e8f6ef;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+}
+
+.heading-ctn {
+  color: #266798;
+  font-weight: bolder;
+  padding: 15px;
+}
+
+.main-ctn {
+  margin-bottom: 15px;
+  width: 100%;
+}

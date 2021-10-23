@@ -1,5 +1,5 @@
 import React from 'react';
-import {createStyles, makeStyles} from '@material-ui/core/styles';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import config from '../../../config';
 
 import CallEnd from '@material-ui/icons/CallEnd';
@@ -23,27 +23,27 @@ const disconnect = async (room, stopSymblWebSocketApi, isConnected) => {
         await stopSymblWebSocketApi(() => {
             room.disconnect();
             if (!window.location.origin.includes('twil.io')) {
-                window.location = config.appBasePath || "/";
+                window.location = config.appBasePath || "/home";
             }
         });
     } else {
         room.disconnect();
         if (!window.location.origin.includes('twil.io')) {
-            window.location = config.appBasePath || "/";
+            window.location = config.appBasePath || "/home";
         }
     }
 };
 
 export default function EndCallButton() {
     const classes = useStyles();
-    const {room} = useVideoContext();
-    const {stopSymblWebSocketApi, isConnected} = useSymblContext()
+    const { room } = useVideoContext();
+    const { stopSymblWebSocketApi, isConnected } = useSymblContext()
 
     return (
         <Tooltip title={'End Call'} onClick={() => disconnect(room, stopSymblWebSocketApi, isConnected)} placement="top"
-                 PopperProps={{disablePortal: true}}>
-            <Fab className={classes.fab} style={{backgroundColor: 'darkred', color: 'white'}}>
-                <CallEnd/>
+            PopperProps={{ disablePortal: true }}>
+            <Fab className={classes.fab} style={{ backgroundColor: 'darkred', color: 'white' }}>
+                <CallEnd />
             </Fab>
         </Tooltip>
     );
