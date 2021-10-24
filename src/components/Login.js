@@ -2,6 +2,7 @@ import React from 'react'
 import SawoLogin from 'sawo-react'
 import { useHistory } from "react-router-dom";
 import { Container, Box, Typography } from '@material-ui/core'
+import './Login.css'
 
 
 function Login() {
@@ -24,17 +25,14 @@ function Login() {
 
     return (
 
-        <Box height='100vh' width='100%' b>
+        <Box height='100vh' width='100%' className='login-ctn'>
             <Container >
-                <Typography variant="h1"
-                    color={'#00A19D'}>
+                <Typography variant="h2" className='heading'>
                     Welcome to Spaces
                 </Typography>
-                <Box border='1px solid black'>
-                    <div className='main-ctn'>
-                        <SawoLogin config={sawoConfig} />
-                    </div>
-                </Box>
+                <div className='main-ctn'>
+                    <SawoLogin config={sawoConfig} />
+                </div>
             </Container>
         </Box>
     )

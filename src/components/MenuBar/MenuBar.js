@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from 'react';
-import {createStyles, makeStyles} from '@material-ui/core/styles';
+import React, { useEffect, useState } from 'react';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import TextField from '@material-ui/core/TextField';
 import Toolbar from '@material-ui/core/Toolbar';
-import {useAppState} from '../../state';
-import {useParams} from 'react-router-dom';
+import { useAppState } from '../../state';
+import { useParams } from 'react-router-dom';
 import useRoomState from '../../hooks/useRoomState/useRoomState';
 import useVideoContext from '../../hooks/useVideoContext/useVideoContext';
-import {Typography} from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import Menu from "./Menu/Menu";
 import LocalAudioLevelIndicator from "./DeviceSelector/LocalAudioLevelIndicator/LocalAudioLevelIndicator";
 import config from '../../config';
@@ -17,7 +17,7 @@ import config from '../../config';
 const useStyles = makeStyles((theme) =>
   createStyles({
     container: {
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: '#FF865E',
     },
     toolbar: {
       [theme.breakpoints.down('xs')]: {
@@ -41,9 +41,11 @@ const useStyles = makeStyles((theme) =>
       marginLeft: theme.spacing(1),
       marginRight: theme.spacing(1),
       maxWidth: 200,
+      backgroundColor: 'transparent'
     },
     loadingSpinner: {
       marginLeft: '1em',
+      color: '#FFB344'
     },
     displayName: {
       margin: '1.1em 0.6em',
@@ -61,7 +63,7 @@ export default function MenuBar() {
   const { URLRoomName } = useParams();
   const { user, getToken, isFetching } = useAppState();
   const { isConnecting, connect, isAcquiringLocalTracks } = useVideoContext();
-  const {roomState} = useRoomState();
+  const { roomState } = useRoomState();
 
   const [name, setName] = useState(user?.displayName || '');
   const [roomName, setRoomName] = useState('');
@@ -98,6 +100,7 @@ export default function MenuBar() {
               <TextField
                 id="menu-name"
                 label="Name"
+                variant="filled"
                 className={classes.textField}
                 value={name}
                 onChange={handleNameChange}
@@ -111,6 +114,7 @@ export default function MenuBar() {
             <TextField
               id="menu-room"
               label="Room"
+              variant="filled"
               className={classes.textField}
               value={roomName}
               onChange={handleRoomNameChange}
@@ -125,7 +129,7 @@ export default function MenuBar() {
             >
               Join Room
             </Button>
-              {(isConnecting || isFetching) && <CircularProgress className={classes.loadingSpinner} />}
+            {(isConnecting || isFetching) && <CircularProgress className={classes.loadingSpinner} />}
           </form>
         ) : (
           <h3>{roomName}</h3>

@@ -1,14 +1,18 @@
-import React, {useEffect, useState} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import moment from 'moment';
 import Typography from '@material-ui/core/Typography';
-import {red} from '@material-ui/core/colors';
+import { red } from '@material-ui/core/colors';
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import TranscriptItem from "./TranscriptItem/TranscriptItem";
 import useSymblContext from "../../hooks/useSymblContext/useSymblContext";
 import padStart from "lodash-es/padStart";
 import Draggable from "react-draggable"
+import db from '../firebase.js'
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { Box } from '@material-ui/core';
+
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -58,7 +62,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-export function TranscriptElement({onSave, width, height, editable = false, transcriptItems}) {
+export function TranscriptElement({ onSave, width, height, editable = false, transcriptItems }) {
 
     const classes = useStyles();
     const w = width;
@@ -80,7 +84,7 @@ export function TranscriptElement({onSave, width, height, editable = false, tran
     }, [transcriptItems, width, height, containerRef])
 
     return (
-        <Grid container style={{width: w}} className={classes.root}>
+        <Grid container style={{ width: w }} className={classes.root}>
             <Draggable>
                 <Paper id={"transcript-paper"} className={classes.mainContainer}
                     variant={"outlined"}
@@ -90,59 +94,98 @@ export function TranscriptElement({onSave, width, height, editable = false, tran
                             Transcript
                         </Typography>
                     </Grid>
-                    <Grid className={classes.transcriptContainer} ref={containerRef} style={{height: `calc(${h} - 62px)`}}>
-                        {transcriptItems.filter(item => !!item).map(({text, timeDiff, from}, index) => (
-                            <TranscriptItem
-                                key={index} index={index}
-                                description={text}
-                                timeDiff={timeDiff}
-                                from={from}
-                                updateTranscript={onSave}
-                                editable={editable}
-                            />))}
+                    <Grid className={classes.transcriptContainer} ref={containerRef} style={{ height: `calc(${h} - 62px)` }}>
+                        {transcriptItems.map((item) => (
+                            <div>
+                                <p>{item.pfrom.name}</p>
+                                <p>{item.ptext}</p>
+                            </div>
+                        ))}
                     </Grid>
                 </Paper>
-            </Draggable>    
+            </Draggable>
         </Grid>
 
     );
 }
 
-const convertMessageToTranscriptItem = (message, startedTime) => {
-    if (message) {
-        const text = message.text || message.payload.content;
-        let timeDiff = {};
-        if (message.duration && message.duration.startTime) {
-            const messageTime = moment(message.duration.startTime);
-            let diff = moment.duration(messageTime.diff(startedTime));
-            timeDiff = {
-                hours: padStart(diff.hours().toString(), 2, '0'),
-                minutes: padStart(diff.minutes().toString(), 2, '0'),
-                seconds: padStart(diff.seconds().toString(), 2, '0'),
-            };
-        }
-        const from = message.from;
-
-        return {
-            text,
-            timeDiff,
-            from
-        }
-    }
-}
 
 export default function Transcript({ height }) {
-    const {newMessages, startedTime} = useSymblContext()
+
+    const convertMessageToTranscriptItem = async (message, startedTime) => {
+        if (message) {
+            const Finaltext = message.text || message.payload.content;
+            let FinalTime = {};
+            if (message.duration && message.duration.startTime) {
+                const messageTime = moment(message.duration.startTime);
+                let diff = moment.duration(messageTime.diff(startedTime));
+                FinalTime = {
+                    hours: padStart(diff.hours().toString(), 2, '0'),
+                    minutes: padStart(diff.minutes().toString(), 2, '0'),
+                    seconds: padStart(diff.seconds().toString(), 2, '0'),
+                };
+            }
+            const Finalfrom = message.from;
+
+            try {
+                const docRef = await addDoc(collection(db, "Developer"), {
+                    description: Finaltext,
+                    from: Finalfrom,
+                    time: FinalTime
+                });
+                console.log("Document written with ID: ", docRef.id);
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+            const querySnapshot = await getDocs(collection(db, "Developer"));
+            if (querySnapshot) {
+                querySnapshot.forEach((doc) => {
+                    setTranscriptItems(prevItems => [...prevItems, {
+                        ptext: doc.data().description,
+                        ptime: doc.data().time,
+                        pfrom: doc.data().from
+                    }])
+                });
+            } else {
+                console.log("Error")
+            }
+        }
+
+
+
+    }
 
     let [transcriptItems, setTranscriptItems] = useState([]);
+    const { newMessages, startedTime } = useSymblContext()
 
     useEffect(() => {
-        if (newMessages && newMessages.length > 0) {
-            const newTranscriptItems = newMessages.map(message => convertMessageToTranscriptItem(message, startedTime));
-            setTranscriptItems([...transcriptItems, ...newTranscriptItems]);
+        const fetchData = async () => {
+            const querySnapshot = await getDocs(collection(db, "Developer"));
+            if (querySnapshot) {
+                querySnapshot.forEach((doc) => {
+                    setTranscriptItems(prevItems => [...prevItems, {
+                        ptext: doc.data().description,
+                        ptime: doc.data().time,
+                        pfrom: doc.data().from
+                    }])
+                });
+            } else {
+                console.log("Error")
+            }
         }
+        fetchData()
+
+    }, [])
+
+
+    useEffect(() => {
+
+        if (newMessages && newMessages.length > 0) {
+            newMessages.map(message => convertMessageToTranscriptItem(message, startedTime));
+        }
+
     }, [newMessages]);
 
-    return <TranscriptElement transcriptItems={transcriptItems} height={height}/>
+    return <TranscriptElement transcriptItems={transcriptItems} height={height} />
 
 }
